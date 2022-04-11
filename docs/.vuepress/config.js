@@ -4,7 +4,7 @@ module.exports = {
   lang: 'zh-CN',
   title: 'eslint手册',
   description: 'eslint从入门到跑路',
-  base: '/eslint-book/dist/',
+  base: '/eslint-book/',
   dest: './dist',
   themeConfig: {
     sidebar,
