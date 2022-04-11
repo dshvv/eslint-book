@@ -25,7 +25,11 @@
   ESLint + Prettier // Prettier则集
 ```
 
-默认的规则集太简单，但大家又不喜欢自己来配置繁杂的 rules 规则，所以一般情况下都会选择一些规则集（比较流行的有 airbnb、standard、prettier 等），相比之下大家都推荐 Prettier 预设规范，配置更少，用起来更舒服。我们来看看比较也能得出结果：
+默认的规则集太简单，但大家又不喜欢自己来配置繁杂的 rules 规则，所以一般情况下都会选择一些规则集（比较流行的有 airbnb、standard、prettier 等）。
+
+相比之下大家都推荐 Prettier 预设规范，配置更少，用起来更舒服，而且Prettier还提供了扩展方便集成到编辑器中进行一键`代码格式化`。
+
+我们来看看比较也能得出结果：
 ![图](/images/1-2.png#xxl)
 
 我们分别使用自带默认规则集、Standard 规则集、Prettier 则集来生成，项目看看区别(只有extends配置有区别，其它都一样)：
