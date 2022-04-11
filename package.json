@@ -1,0 +1,25 @@
+{
+  "name": "eslint-book",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vuepress dev docs",
+    "build": "vuepress build docs",
+    "side": "node ./utils/gen-side.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dshvv/linux-book.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/dshvv/linux-book/issues"
+  },
+  "homepage": "https://github.com/dshvv/linux-book#readme",
+  "devDependencies": {
+    "vuepress": "^2.0.0-beta.38"
+  }
+}
