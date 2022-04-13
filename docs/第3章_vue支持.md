@@ -12,6 +12,8 @@
 
 ## vue cli
 
+基于 webpack 构建的 vue 脚手架工具。
+
 **选择代码检测和格式化方案**  
 使用脚手架创建项目的时候，是可以直接选择 eslint 的集成。  
 ![图](/images/1-1.png#xxl)
@@ -30,6 +32,7 @@
 相比之下大家都推荐 Prettier 预设规范，配置更少，用起来更舒服，而且 Prettier 还提供了扩展方便集成到编辑器中进行一键`代码格式化`。
 
 我们来看看比较也能得出结果：
+
 ![图](/images/1-2.png#xxl)
 
 我们分别使用自带默认规则集、Standard 规则集、Prettier 则集来生成，项目看看区别(只有 extends 配置有区别，其它都一样)：
@@ -61,6 +64,67 @@ Pick additional lint features:
   Lint on save // 保存就检测
   Lint and fix on commit // fix和commit时候检查
 ```
+
+## vite cli
+
+下一代前端开发与构建工具，区别于 vue cli 使用的 vebpack，create-vite 在 dev server 使用原生 esm 运行时打包，生产则使用 rollup。  
+支持 react、vue 框架，这里主要以 vue 举例。
+
+create-vite 此脚手架官方可选模板并没有像 vue cli 那样可选集成了 eslint（包含 vuex、vue-router 都需要自己后续手动集成）
+
+```shell
+yarn create vite my-vue-app --template vue-ts
+```
+
+至此一个极为简单的 vite 版的 vue 项目就创建完了，接下来集成 eslint。
+
+### 分析集成 eslint
+
+为了方便理解，先一步一步的按照思路进行配置，否则请直接看下一步的完整配置 eslint。  
+推荐配置：vite+vue3+ts+prettier 的规则校验。
+
+**1、安装 eslint**  
+安装 eslint，并初始化配置文件。
+
+```shell
+yarn add --dev eslint
+```
+
+创建 eslint 的配置文件内容如下，也可以用命令创建`npm init @eslint/config`
+
+```javascript
+module.exports = {
+  root: true,
+  env: {
+    node: true,
+  },
+  extends: ["eslint:recommended"],
+  parserOptions: {
+    ecmaVersion: "latest",
+  },
+  rules: {},
+};
+```
+
+**2、添加执行脚本**    
+在 package.json的scripts属性 添加如下：
+
+```javascript
+"lint": "eslint --cache --max-warnings 0  \"src/**/*.{js}\""
+```
+然后执行`npm run lint`   
+就可以检查src目录下的js文件了。    
+比如，rules可以设置缩进为2个空格，然后在js里故意缩进3个空格，看看是否报错。
+
+### 完整配置 eslint
+
+```shell
+yarn add --dev eslint eslint-plugin-vue
+```
+
+eslint：核心包，前端代码规则校验工具，默认内置了最基本的通用规则校验，[文档在此](https://eslint.org)
+
+eslint-plugin-vue：vue 的官方 ESLint 插件，提供了 vue 所需要的规则集，[文档在此](https://eslint.vuejs.org)
 
 ## rules
 
@@ -155,7 +219,7 @@ overrides: [
 
 ## Prettier
 
-如上规则，其实完成一个优秀的 eslint配置 还需要几十个甚至上百个规则配置，实在麻烦。  
+如上规则，其实完成一个优秀的 eslint 配置 还需要几十个甚至上百个规则配置，实在麻烦。  
 于是大家都使用了预设的规则集 Prettier。
 
 **安装使用**
@@ -176,10 +240,12 @@ extends: [
     "plugin:prettier/recommended"
 ]
 ```
-完成如上配置即可。
-通常情况下，默认的prettier规范已够我们使用，如果需要调整，直接修改prettier.config.js配置文件即可。
 
-## 推荐eslint配置
+完成如上配置即可。
+通常情况下，默认的 prettier 规范已够我们使用，如果需要调整，直接修改 prettier.config.js 配置文件即可。
+
+## 推荐 eslint 配置
+
 ```javascript
 module.exports = {
   root: true,
@@ -201,5 +267,4 @@ module.exports = {
     "prettier/prettier": "error",
   },
 };
-
 ```
