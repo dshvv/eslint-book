@@ -9,6 +9,8 @@
 [我为什么推荐 Prettier 来统一代码风格](https://blog.csdn.net/Fundebug/article/details/78342784)  
 [Vue CLI 3.0 文档](https://www.bluesdream.com/blog/vue-cli-3-document-install-and-create.html)  
 [ESLint 与 Prettier 配合使用](https://segmentfault.com/a/1190000015315545)
+[Typescript 中如何正确使用 ESLint 和 Prettier](https://zhuanlan.zhihu.com/p/359174647)
+[eslint中文文档](https://eslint.bootcss.com)
 
 ## vue cli
 
@@ -90,7 +92,7 @@ yarn create vite my-vue-app --template vue-ts
 yarn add --dev eslint
 ```
 
-创建 eslint 的配置文件内容如下，也可以用命令创建`npm init @eslint/config`
+创建 eslint 的配置文件`.eslintrc.js`内容如下，也可以用命令创建`npm init @eslint/config`
 
 ```javascript
 module.exports = {
@@ -116,15 +118,167 @@ module.exports = {
 就可以检查src目录下的js文件了。    
 比如，rules可以设置缩进为2个空格，然后在js里故意缩进3个空格，看看是否报错。
 
-### 完整配置 eslint
-
+**3、支持typescript**     
+eslint默认解析器espree 只能解析 js 文件。    
+安装eslint的[ts相关支持包](https://typescript-eslint.io)
 ```shell
-yarn add --dev eslint eslint-plugin-vue
+yarn add --dev @typescript-eslint/eslint-plugin @typescript-eslint/parser
+```
+然后在eslint的配置文件，增加 parser 字段， 添加如下代码
+```shell
+parser: '@typescript-eslint/parser',
+plugins: ['@typescript-eslint'],
+extends: [
+  ...
+  "plugin:@typescript-eslint/recommended"
+]
+```
+将执行命令修改，添加`.ts`文件的检测
+```shell
+"lint": "eslint --cache --max-warnings 0  \"src/**/*.{js,ts}\""
+```
+**4、支持vue**   
+截至目前，vue文件还不能被eslint检测。    
+来让其支持，安装[依赖](https://eslint.vuejs.org)
+```shell
+yarn add --dev eslint-plugin-vue
 ```
 
-eslint：核心包，前端代码规则校验工具，默认内置了最基本的通用规则校验，[文档在此](https://eslint.org)
+之前解析器需要指定为vue，然后将之前的ts挪到解析配置项中，并添加extends，具体如下
+```shell
+parser: 'vue-eslint-parser',
+parserOptions: {
+  ...
+  parser: "@typescript-eslint/parser",
+},
+extends: [
+  ...
+  "plugin:vue/vue3-recommended",
+],
+```
+将执行命令修改，添加`.vue`文件的检测
+```javascript
+"lint": "eslint --cache --max-warnings 0  \"src/**/*.{js,ts,vue}\""
+```
 
-eslint-plugin-vue：vue 的官方 ESLint 插件，提供了 vue 所需要的规则集，[文档在此](https://eslint.vuejs.org)
+
+**5、支持prettier**     
+安装依赖 
+```shell
+yarn add --dev prettier eslint-config-prettier eslint-plugin-prettier
+```
+然后在eslint的配置文件, extends 字段， 添加如下代码
+```shell
+"plugin:prettier/recommended",
+```
+
+配置prettier，prettier.config.js
+```javascript
+module.exports = {
+  semi: true, // 句尾添加分号
+  vueIndentScriptAndStyle: true, // 是否给vue中的 <script> and <style>标签加缩进
+  singleQuote: true, // 使用单引号代替双引号
+  trailingComma: 'none', // 选项：none|es5|all， 在对象或数组最后一个元素后面是否加逗号
+  singleAttributePerLine: true, // HTML、Vue 和 JSX 中有多个属性时，会触发换行
+  bracketSameLine: true // 处理singleAttributePerLine闭合标签也会独占一行问题
+};
+
+```
+
+**6、配置自定义规则**
+在eslint的配置文件，增加 rules 
+```javascript
+rules: {
+    'prettier/prettier': 'error',
+    'no-var': 'error', // 禁止使用var
+    // ---vue-eslint参考：https://eslint.vuejs.org/rules---
+    'vue/attribute-hyphenation': ['error', 'always'], // vue模板属性中划线
+    'vue/name-property-casing': ['error', 'PascalCase'], // vue组件名规范
+    'vue/component-name-in-template-casing': ['error', 'kebab-case'], // vue模板使用组件名规范
+    'vue/html-self-closing': [
+      'error',
+      {
+        html: {
+          void: 'always'
+        }
+      }
+    ], // 强制自闭合标签
+    // ---tslint 规则集参考：https://typescript-eslint.io/rules---
+    '@typescript-eslint/no-explicit-any': 'warn', // 允许使用any类型，但是警告（默认即使警告，可以不用声明）
+    '@typescript-eslint/no-var-requires': 'warn', // 允许使用require，但是警告(默认不允许)
+    '@typescript-eslint/no-empty-function': 'off', // 允许空方法，因为可能是做单例限制构造or被注解修饰的空方法（默认为error）
+    '@typescript-eslint/ban-ts-comment': 'off', // 允许@ts- 指令的使用，如@ts-nocheck（默认不允许使用）
+    '@typescript-eslint/ban-types': [
+      'warn',
+      {
+        extendDefaults: true,
+        types: {
+          Function: false
+        }
+      }
+    ], // 禁止部分值被作为类型(默认[https://.../ban-types#default-options]全部error，通过types来放开校验)
+    '@typescript-eslint/no-non-null-assertion': 'off' // 允许 非空断言操作符（默认为不允许）
+    // '@typescript-eslint/explicit-module-boundary-types': 'off'  // 函数必须定义参数类型和返回类型，默认即是关闭校验
+  }
+```
+
+
+
+### 完整配置 eslint
+```javascript
+module.exports = {
+  root: true,
+  env: {
+    'vue/setup-compiler-macros': true, // 处理error ‘defineProps’ is not defined no-undef
+    node: true
+  },
+  parser: 'vue-eslint-parser',
+  parserOptions: {
+    ecmaVersion: 'latest',
+    parser: '@typescript-eslint/parser'
+  },
+  extends: [
+    'eslint:recommended',
+    'plugin:@typescript-eslint/recommended',
+    'plugin:vue/vue3-recommended',
+    'plugin:prettier/recommended'
+  ],
+  rules: {
+    'prettier/prettier': 'error',
+    'no-var': 'error', // 禁止使用var
+    // ---vue-eslint参考：https://eslint.vuejs.org/rules---
+    'vue/attribute-hyphenation': ['error', 'always'], // vue模板属性中划线
+    'vue/name-property-casing': ['error', 'PascalCase'], // vue组件名规范
+    'vue/component-name-in-template-casing': ['error', 'kebab-case'], // vue模板使用组件名规范
+    'vue/html-self-closing': [
+      'error',
+      {
+        html: {
+          void: 'always'
+        }
+      }
+    ], // 强制自闭合标签
+    // ---tslint 规则集参考：https://typescript-eslint.io/rules---
+    '@typescript-eslint/no-explicit-any': 'warn', // 允许使用any类型，但是警告（默认即使警告，可以不用声明）
+    '@typescript-eslint/no-var-requires': 'warn', // 允许使用require，但是警告(默认不允许)
+    '@typescript-eslint/no-empty-function': 'off', // 允许空方法，因为可能是做单例限制构造or被注解修饰的空方法（默认为error）
+    '@typescript-eslint/ban-ts-comment': 'off', // 允许@ts- 指令的使用，如@ts-nocheck（默认不允许使用）
+    '@typescript-eslint/ban-types': [
+      'warn',
+      {
+        extendDefaults: true,
+        types: {
+          Function: false
+        }
+      }
+    ], // 禁止部分值被作为类型(默认[https://.../ban-types#default-options]全部error，通过types来放开校验)
+    '@typescript-eslint/no-non-null-assertion': 'off' // 允许 非空断言操作符（默认为不允许）
+    // '@typescript-eslint/explicit-module-boundary-types': 'off'  // 函数必须定义参数类型和返回类型，默认即是关闭校验
+  }
+};
+
+```
+
 
 ## rules
 
